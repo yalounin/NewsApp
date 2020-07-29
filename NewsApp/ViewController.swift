@@ -19,6 +19,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     // копия таблицы для возможности отката
     var doubleNews: [News] = []
     
+    // является ли строка развернутой
+    var isNewsTextFullSize = [Bool](repeatElement(false, count: NewsList.allNews.count))
+    
     @IBAction func sortButton(_ sender: UIButton) {
         
         // MARK: ДИАЛОГОВОЕ ОКНО
@@ -27,26 +30,31 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         //  сортировки
         let sortDateAscAction = UIAlertAction(title: "По времени (asc)", style: .default) { (action: UIAlertAction) ->Void in
             self.dateAscSortTable()
+            self.hideAllRowsText()
         }
         
         
         let sortDateDescAction = UIAlertAction(title: "По времени (desc)", style: .default) { (action: UIAlertAction) ->Void in
             self.dateDescSortTable()
+            self.hideAllRowsText()
         }
         
         
         let sortAscLengthTextAction = UIAlertAction(title: "По длине текста (asc)", style: .default) { (action) in
             self.lengthAscSortTable()
+            self.hideAllRowsText()
         }
         
         
         let sortDescLengthTextAction = UIAlertAction(title: "По длине текста (desc)", style: .default) { (action) in
             self.lengthDescSortTable()
+            self.hideAllRowsText()
         }
         
         
         let resetTextAction = UIAlertAction(title: "Сбросить", style: .default) { (action) in
             self.resetSortTable()
+            self.hideAllRowsText()
         }
         
         let cancel = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
@@ -58,6 +66,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         ac.addAction(cancel)
         
         present(ac, animated: true, completion: nil)
+        
     }
     
     // количество секций
@@ -123,20 +132,35 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath) as! NewsTableViewCell
         
+        
         // наполнение строк данными
         cell.thumbnailImageView.image = UIImage(named: news[indexPath.row].image)
         cell.newsTextLabel.text = news[indexPath.row].text
         cell.dateLabel.text  = news[indexPath.row].date
         
+        // сворачивание/разворачивание строк:
+        
+        if isNewsTextFullSize[indexPath.row] {
+            
+            cell.newsTextLabel.numberOfLines = 0
+            cell.changeLabelSizeButton.setTitle("Read less", for: .normal)
+            
+        } else {
+            
+            cell.newsTextLabel.numberOfLines = 3
+            cell.changeLabelSizeButton.setTitle("Read more", for: .normal)
+            
+        }
+        
+        // присваеваем тегу кнопки порядковый номер строки
         cell.changeLabelSizeButton.tag = indexPath.row
-        
-        // установка дефолтного ограничения
-        cell.newsTextLabel.numberOfLines = 3
-        
-        // установка дефолтного тайтла кнопки
-        cell.changeLabelSizeButton.setTitle("Read more", for: .normal)
+
         
         return cell
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
     }
     
     
@@ -158,27 +182,49 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
     }
     
-    // кнопка Read more
+    // MARK: КНОПКА Read more/less
     @IBAction func changeLabelSize(_ sender: UIButton) {
+        
         self.tableView.beginUpdates()
         
         // определение, в какой строке происходит нажатие
-        let indexPath = IndexPath(row: sender.tag, section: 0)
-        let cell = self.tableView.cellForRow(at: indexPath) as! NewsTableViewCell
+        let selectedRow = sender.tag
+        // присвоение состояния строки - переменной (ибо в цикле затирается)
+        let isSelectedRowTextFullSize = isNewsTextFullSize[selectedRow]
         
-        // показать/скрыть полный текст строки
-        if !cell.isNewsLabelTextFullSize {
-            cell.newsTextLabel.numberOfLines = 0
-            cell.changeLabelSizeButton.setTitle("Read less", for: .normal)
-            cell.isNewsLabelTextFullSize = true
-        } else if cell.isNewsLabelTextFullSize {
-            cell.newsTextLabel.numberOfLines = 3
-            cell.changeLabelSizeButton.setTitle("Read more", for: .normal)
-            cell.isNewsLabelTextFullSize = false
+        // сворачиваем все строки таблицы
+        hideAllRowsText()
+        
+        // разворачиваем выбранную строку, если она не развернута
+        if !isSelectedRowTextFullSize {
+            
+            showFullText(param: selectedRow)
+            
         }
-
+        
         self.tableView.endUpdates()
         
+    }
+    
+    
+    // показать весь текст в выбранной строке
+    func showFullText(param: Int) {
+        let indexPath = IndexPath(row: param, section: 0)
+        let cell = self.tableView.cellForRow(at: indexPath) as? NewsTableViewCell
+        cell?.changeLabelSizeButton.setTitle("Read less", for: .normal)
+        cell?.newsTextLabel.numberOfLines = 0
+        isNewsTextFullSize[param] = true
+    }
+    
+    // скрыть текст во всех строках до дефолтного ограничения по строкам лейбла
+    func hideAllRowsText() {
+        for i in 0..<news.count {
+        let indexPath = IndexPath(row: i, section: 0)
+        let cell = self.tableView.cellForRow(at: indexPath) as? NewsTableViewCell
+        cell?.changeLabelSizeButton.setTitle("Read more", for: .normal)
+        cell?.newsTextLabel.numberOfLines = 3
+        isNewsTextFullSize[i] = false
+        }
     }
     
     

@@ -16,9 +16,7 @@ class NewsTableViewCell: UITableViewCell {
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var thumbnailImageView: UIImageView!
     @IBOutlet weak var changeLabelSizeButton: UIButton!
-    
-    // является ли строка развернутой
-    var isNewsLabelTextFullSize: Bool = false
+
     
 
     
