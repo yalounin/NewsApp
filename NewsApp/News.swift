@@ -8,7 +8,7 @@
 
 import UIKit
 
-struct News { // модель 1-й конкретной новости
+struct News { // модель одной конкретной новости
     var image: String // имя файла картинки
     var date: String // дата в виде dd/MM/yyyy
     var text: String // текст новости
@@ -16,7 +16,8 @@ struct News { // модель 1-й конкретной новости
         get {
             let formatter = DateFormatter()
             formatter.dateFormat = "dd/MM/yyyy"
-            return formatter.date(from: date)!
+            // если дата записана в некорректном формате, использовать текущую дату
+            return formatter.date(from: date) ?? Date()
         }
     }
 }
@@ -32,7 +33,7 @@ struct NewsList { // список новостей
 extension NewsList {
     static var allNews: [News] {
         return [
-            News(image: "image1.jpg", date: "26/07/2020", text: "SEATTLE — Weeks of violent clashes between federal agents and protesters in Portland, Ore., galvanized thousands of people to march through the streets of American cities on Saturday, injecting new life into protests that had largely waned in recent weeks. \nOne of the most intense protests was in Seattle, where a day of demonstrations focused on police violence left a trail of broken windows and people flushing pepper spray from their eyes. At least 45 protesters had been arrested as of early evening, and both protesters and police officers suffered injuries." as String),
+            News(image: "image1.jpg", date: "30/06/2020", text: "SEATTLE — Weeks of violent clashes between federal agents and protesters in Portland, Ore., galvanized thousands of people to march through the streets of American cities on Saturday, injecting new life into protests that had largely waned in recent weeks. \nOne of the most intense protests was in Seattle, where a day of demonstrations focused on police violence left a trail of broken windows and people flushing pepper spray from their eyes. At least 45 protesters had been arrested as of early evening, and both protesters and police officers suffered injuries." as String),
             News(image: "image2.jpg", date: "25/07/2020", text: "North Korea has reported what it describes as the country's first suspected case of coronavirus.\nState news agency KCNA said a person who defected to South Korea three years ago last week returned across the demarcation line had Covid-19 symptoms.\nLeader Kim Jong-un held an emergency meeting with top officials, imposing a lockdown in the border city of Kaesong." as String),
             News(image: "image3.jpg", date: "18/07/2020", text: "Hundreds of Thai gay activists have raised rainbow flags in Bangkok during a pro-democracy rally in the capital.\nThey danced and sang in the city centre, where police were deployed. There were no reports of any violence.\nSaturday's rally was the latest in a series of youth-led protests calling for the government to resign.\nGeneral Prayuth Chan-ocha seized power in a coup in 2014, and was later named as prime minister by the military-appointed parliament." as String),
             News(image: "image4.jpg", date: "15/06/2020", text: "In the week that Oxford University announced promising results from its coronavirus vaccine trial, we're looking at claims on social media about vaccines and misleading statements about their safety.\nThe anti-vaccination movement has gained traction online in recent years, and campaigners opposed to vaccination have moved their focus to making claims relating to the coronavirus." as String),

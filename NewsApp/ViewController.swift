@@ -19,8 +19,8 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     // копия таблицы для возможности отката
     var doubleNews: [News] = []
     
-    // является ли строка развернутой
-    var isNewsTextFullSize = [Bool](repeatElement(false, count: NewsList.allNews.count))
+    // индекс развернутой ячейки (может не иметь значения)
+    var indexOfExpandedCell: Int?
     
     @IBAction func sortButton(_ sender: UIButton) {
         
@@ -28,33 +28,33 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         let ac = UIAlertController(title: nil, message: "Сортировать", preferredStyle: .actionSheet)
         
         //  сортировки
-        let sortDateAscAction = UIAlertAction(title: "По времени (asc)", style: .default) { (action: UIAlertAction) ->Void in
-            self.dateAscSortTable()
-            self.hideAllRowsText()
+        let sortDateAscAction = UIAlertAction(title: "По времени (asc)", style: .default) { [weak self] (action: UIAlertAction) ->Void  in
+            self?.dateAscSortTable()
+            self?.hideAllRowsText()
         }
         
         
-        let sortDateDescAction = UIAlertAction(title: "По времени (desc)", style: .default) { (action: UIAlertAction) ->Void in
-            self.dateDescSortTable()
-            self.hideAllRowsText()
+        let sortDateDescAction = UIAlertAction(title: "По времени (desc)", style: .default) { [weak self] (action: UIAlertAction) ->Void in
+            self?.dateDescSortTable()
+            self?.hideAllRowsText()
         }
         
         
-        let sortAscLengthTextAction = UIAlertAction(title: "По длине текста (asc)", style: .default) { (action) in
-            self.lengthAscSortTable()
-            self.hideAllRowsText()
+        let sortAscLengthTextAction = UIAlertAction(title: "По длине текста (asc)", style: .default) { [weak self] (action) in
+            self?.lengthAscSortTable()
+            self?.hideAllRowsText()
         }
         
         
-        let sortDescLengthTextAction = UIAlertAction(title: "По длине текста (desc)", style: .default) { (action) in
-            self.lengthDescSortTable()
-            self.hideAllRowsText()
+        let sortDescLengthTextAction = UIAlertAction(title: "По длине текста (desc)", style: .default) { [weak self] (action) in
+            self?.lengthDescSortTable()
+            self?.hideAllRowsText()
         }
         
         
-        let resetTextAction = UIAlertAction(title: "Сбросить", style: .default) { (action) in
-            self.resetSortTable()
-            self.hideAllRowsText()
+        let resetTextAction = UIAlertAction(title: "Сбросить", style: .default) { [weak self] (action) in
+            self?.resetSortTable()
+            self?.hideAllRowsText()
         }
         
         let cancel = UIAlertAction(title: "Отмена", style: .cancel, handler: nil)
@@ -64,6 +64,10 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         ac.addAction(sortDescLengthTextAction)
         ac.addAction(resetTextAction)
         ac.addAction(cancel)
+        
+        if let presenter = ac.popoverPresentationController {
+            presenter.sourceView = sender;
+        }
         
         present(ac, animated: true, completion: nil)
         
@@ -140,7 +144,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         
         // сворачивание/разворачивание строк:
         
-        if isNewsTextFullSize[indexPath.row] {
+        if indexPath.row == indexOfExpandedCell {
             
             cell.newsTextLabel.numberOfLines = 0
             cell.changeLabelSizeButton.setTitle("Read less", for: .normal)
@@ -152,9 +156,9 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
             
         }
         
-        // присваеваем тегу кнопки порядковый номер строки
-        cell.changeLabelSizeButton.tag = indexPath.row
-
+        // присваеваем кастомному индексу кнопки порядковый номер строки
+        cell.changeLabelSizeButton.indexOfCell = indexPath.row
+        
         
         return cell
     }
@@ -176,27 +180,27 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         sortedButtonOutlet.setTitle("Нет сортировки", for: .normal)
         
         // наполнение копии данными
-        for i in self.news {
-            doubleNews.append(i)
-        }
+        doubleNews = news
+        
         
     }
     
+    
     // MARK: КНОПКА Read more/less
-    @IBAction func changeLabelSize(_ sender: UIButton) {
+    @IBAction func changeLabelSize(_ sender: UICellButton) {
         
         self.tableView.beginUpdates()
         
         // определение, в какой строке происходит нажатие
-        let selectedRow = sender.tag
-        // присвоение состояния строки - переменной (ибо в цикле затирается)
-        let isSelectedRowTextFullSize = isNewsTextFullSize[selectedRow]
+        let selectedRow = sender.indexOfCell
+        // присвоение индекса развернутой строки константе, так как далее он затирается
+        let indexOfExpandedRow = indexOfExpandedCell
         
         // сворачиваем все строки таблицы
         hideAllRowsText()
         
         // разворачиваем выбранную строку, если она не развернута
-        if !isSelectedRowTextFullSize {
+        if indexOfExpandedRow != selectedRow {
             
             showFullText(param: selectedRow)
             
@@ -209,24 +213,25 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
     
     // показать весь текст в выбранной строке
     func showFullText(param: Int) {
+        indexOfExpandedCell = param
         let indexPath = IndexPath(row: param, section: 0)
         let cell = self.tableView.cellForRow(at: indexPath) as? NewsTableViewCell
         cell?.changeLabelSizeButton.setTitle("Read less", for: .normal)
         cell?.newsTextLabel.numberOfLines = 0
-        isNewsTextFullSize[param] = true
     }
     
     // скрыть текст во всех строках до дефолтного ограничения по строкам лейбла
     func hideAllRowsText() {
+        indexOfExpandedCell = nil
         for i in 0..<news.count {
-        let indexPath = IndexPath(row: i, section: 0)
-        let cell = self.tableView.cellForRow(at: indexPath) as? NewsTableViewCell
-        cell?.changeLabelSizeButton.setTitle("Read more", for: .normal)
-        cell?.newsTextLabel.numberOfLines = 3
-        isNewsTextFullSize[i] = false
+            let indexPath = IndexPath(row: i, section: 0)
+            let cell = self.tableView.cellForRow(at: indexPath) as? NewsTableViewCell
+            cell?.changeLabelSizeButton.setTitle("Read more", for: .normal)
+            cell?.newsTextLabel.numberOfLines = 3
         }
     }
     
     
 }
+
 

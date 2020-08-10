@@ -15,19 +15,7 @@ class NewsTableViewCell: UITableViewCell {
     @IBOutlet weak var newsTextLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!
     @IBOutlet weak var thumbnailImageView: UIImageView!
-    @IBOutlet weak var changeLabelSizeButton: UIButton!
+    @IBOutlet weak var changeLabelSizeButton: UICellButton!
 
-    
-
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-    }
-
-    override func setSelected(_ selected: Bool, animated: Bool) {
-        super.setSelected(selected, animated: animated)
-        
-
-    }
 
 }
