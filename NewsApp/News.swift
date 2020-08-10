@@ -13,6 +13,7 @@ struct News { // модель одной конкретной новости
     var date: String // дата в виде dd/MM/yyyy
     var text: String // текст новости
     var dateValue: Date{ // необходимо для сортировки новостей по дате
+        
         get {
             let formatter = DateFormatter()
             formatter.dateFormat = "dd/MM/yyyy"

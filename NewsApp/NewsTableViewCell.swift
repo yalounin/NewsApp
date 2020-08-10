@@ -10,7 +10,6 @@ import UIKit
 
 class NewsTableViewCell: UITableViewCell {
 
-
     // составляющие элементы строки
     @IBOutlet weak var newsTextLabel: UILabel!
     @IBOutlet weak var dateLabel: UILabel!

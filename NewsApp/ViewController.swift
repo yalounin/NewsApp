@@ -65,6 +65,7 @@ class ViewController: UIViewController, UITableViewDataSource, UITableViewDelega
         ac.addAction(resetTextAction)
         ac.addAction(cancel)
         
+        
         if let presenter = ac.popoverPresentationController {
             presenter.sourceView = sender;
         }

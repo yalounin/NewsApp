@@ -8,6 +8,7 @@
 
 import UIKit
 
+
 class UICellButton: UIButton {
 
     // индекс ячейки, в которой происходит нажатие кнопки
